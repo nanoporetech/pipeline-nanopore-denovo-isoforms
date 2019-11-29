@@ -1,0 +1,15 @@
+---
+## General pipeline parameters:
+
+# Name of the pipeline:
+pipeline: "pipeline-isONclust2"
+# ABSOLUTE path to directory holding the working directory:
+workdir_top: "."
+# Repository URL:
+repo: "https://github.com/nanoporetech/pipeline-isONclust2"
+
+## Pipeline-specific parameters:
+
+# Input fastq:
+reads_fastq: "evaluation/data/SIRV_PSC109_phmm_fl.fq"
+

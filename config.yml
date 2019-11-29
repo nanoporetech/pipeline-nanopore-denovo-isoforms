@@ -1,0 +1,14 @@
+---
+## General pipeline parameters:
+
+# Name of the pipeline:
+pipeline: "pipeline-isONclust2"
+# ABSOLUTE path to directory holding the working directory:
+workdir_top: "Workspaces"
+# Repository URL:
+repo: "https://github.com/nanoporetech/pipeline-isONclust2.git"
+
+## Pipeline-specific parameters:
+
+# cDNA or direct RNA reads in fastq format
+reads_fastq: "evaluation/data/SIRV_PSC109_phmm_fl.fq"
