@@ -2,14 +2,44 @@
 ## General pipeline parameters:
 
 # Name of the pipeline:
-pipeline: "pipeline-isONclust2"
+pipeline: "pipeline-isONclust2_SIRV_E0"
 # ABSOLUTE path to directory holding the working directory:
-workdir_top: "."
+workdir_top: "evaluation"
 # Repository URL:
-repo: "https://github.com/nanoporetech/pipeline-isONclust2"
+repo: "https://github.com/nanoporetech/pipeline-isONclust2.git"
 
 ## Pipeline-specific parameters:
+cores: 20
 
-# Input fastq:
-reads_fastq: "evaluation/data/SIRV_PSC109_phmm_fl.fq"
+# cDNA or direct RNA reads in fastq format
+reads_fastq: "evaluation/data/SIRV_PCS109_phmm_fl.fq"
 
+# Batch size in kilobases (if -1 then it is calculated based on the number of cores and bases):
+batch_size: -1
+
+# Clustering mode:
+cls_mode: "sahlin"
+
+# Kmer size:
+kmer_size: 11
+
+# Window size:
+window_size: 20
+
+# Minimum number of minimizers shared between read and cluster:
+min_shared: 5
+
+# Minimum average quality value:
+min_qual: 7.0
+
+# Minmum mapped fraction of read to be included in cluster:
+mapped_threshold: 0.65
+
+# Minimum aligned fraction of read to be included in cluster:
+aligned_threshold: 0.2
+
+# Minimum fraction of minimizers shared compared to best hit, in order to continue mapping:
+min_fraction: 0.8
+
+# Minimum probability for i consecutive minimizers to be different between read and representative:
+min_prob_no_hits: 0.1 
