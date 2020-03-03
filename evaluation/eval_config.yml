@@ -24,22 +24,19 @@ batch_max_seq: -1
 cls_mode: "sahlin"
 
 # Kmer size:
-kmer_size: 13
+kmer_size: 11
 
 # Window size:
-window_size: 20
+window_size: 15
 
 # Consensus period (-1 means no consensus):
-consensus_period: -1
-
-# Consensus period (-1 means no consensus):
-consensus_period: 100
+consensus_period: 500
 
 # Minimum consensus sample size:
-consensus_minimum: 100
+consensus_minimum: 50
 
 # Maximum consensus sample size:
-consensus_maximum: 100
+consensus_maximum: -150
 
 # Minimum number of minimizers shared between read and cluster:
 min_shared: 5
