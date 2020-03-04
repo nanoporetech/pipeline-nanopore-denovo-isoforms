@@ -2,7 +2,7 @@
 ## General pipeline parameters:
 
 # Name of the pipeline:
-pipeline: "pipeline-isONclust2_SIRV_E0"
+pipeline: "pipeline-isONclust2_dmel/results"
 # ABSOLUTE path to directory holding the working directory:
 workdir_top: "evaluation"
 # Repository URL:
@@ -12,7 +12,7 @@ repo: "https://github.com/nanoporetech/pipeline-isONclust2.git"
 cores: 20
 
 # cDNA or direct RNA reads in fastq format
-reads_fastq: "evaluation/data/SIRV_PCS109_phmm_fl.fq"
+reads_fastq: "evaluation/pipeline-isONclust2_dmel/data/ERR3588905_1.fastq"
 
 # Batch size in kilobases (if -1 then it is calculated based on the number of cores and bases):
 batch_size: -1
@@ -31,9 +31,6 @@ window_size: 20
 
 # Consensus period (-1 means no consensus):
 consensus_period: -1
-
-# Consensus period (-1 means no consensus):
-consensus_period: 100
 
 # Minimum consensus sample size:
 consensus_minimum: 100
