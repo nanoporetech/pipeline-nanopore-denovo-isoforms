@@ -130,14 +130,14 @@ if config['batch_size'] < 0:
 print("Batch size is: {}".format(config['batch_size']))
 
 init_cls_options = """ --batch-size {} --kmer-size {} --window-size {} --min-shared {} --min-qual {}\
-                     --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {}"""
+                     --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {} -M {} -P {}"""
 init_cls_options = init_cls_options.format(config["batch_size"], config["kmer_size"], config["window_size"], config["min_shared"], config["min_qual"], \
-                    config["mapped_threshold"], config["aligned_threshold"], config["min_fraction"], config["min_prob_no_hits"])
+                    config["mapped_threshold"], config["aligned_threshold"], config["min_fraction"], config["min_prob_no_hits"], config["batch_max_seq"], config["consensus_period"])
 
 
 shell("""
         rm -fr clusters sorted
-        mkdir -p sorted; isONclust2 sort {} -v -o sorted {};
+        mkdir -p sorted; isONclust2 sort {} -P -1 -v -o sorted {};
         mkdir -p clusters;
     """.format(init_cls_options, in_fastq))
 JOB_TREE = OrderedDict()

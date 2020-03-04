@@ -17,6 +17,9 @@ reads_fastq: "evaluation/data/SIRV_PSC109_phmm_fl.fq"
 # Batch size in kilobases (if -1 then it is calculated based on the number of cores and bases):
 batch_size: -1
 
+# Maximum sequences per input batch (-1 means no limit):
+batch_max_seq: -1
+
 # Clustering mode:
 cls_mode: "sahlin"
 
@@ -25,6 +28,9 @@ kmer_size: 13
 
 # Window size:
 window_size: 20
+
+# Consensus period (-1 means no consensus):
+consensus_period: -1
 
 # Minimum number of minimizers shared between read and cluster:
 min_shared: 5
