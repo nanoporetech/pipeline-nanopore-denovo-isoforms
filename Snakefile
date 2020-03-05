@@ -84,7 +84,7 @@ rule cluster_job_%d:
     input:
         left = "sorted/batches/isONbatch_%d.cer",
     output: "clusters/isONcluster_%d.cer"
-    shell: "isONclust2 cluster -x %s -v -Q -l %s -o %s"
+    shell: "isONclust2 cluster -x %s -v -Q -l %s -o %s ; sync"
 
     """
     template = """
@@ -93,9 +93,18 @@ rule cluster_job_%d:
         left = "clusters/isONcluster_%d.cer",
         right = "clusters/isONcluster_%d.cer",
     output: "clusters/isONcluster_%d.cer"
-    shell: "isONclust2 cluster -x %s -v -Q -l %s -r %s -o %s"
+    shell: "isONclust2 cluster -x %s -v -Q -l %s -r %s -o %s ; sync"
 
     """
+
+    link_template="""
+rule link_root:
+    input: "clusters/isONcluster_%d.cer",
+    output: "clusters/isONcluster_ROOT.cer"
+    shell: "ln -s `realpath {input}` {output}"
+
+    """
+
     fh = open(snk, "w")
     for nr, l in levels.items():
         for n in l:
@@ -105,6 +114,8 @@ rule cluster_job_%d:
             else:
                 jr = template % (n.Id, n.Left.Id, n.Right.Id, n.Id, config["cls_mode"], "{input.left}", "{input.right}", "{output}")
                 fh.write(jr)
+    global ROOT
+    fh.write(link_template % ROOT)
     fh.flush()
     fh.close()
 
@@ -123,37 +134,36 @@ def count_fastq_bases(fname, size=128000000):
     fh.close()
     return count
 
-nr_bases = count_fastq_bases(in_fastq)
-if config['batch_size'] < 0:
-    config['batch_size'] = int(nr_bases/1000/config["cores"])
-
-print("Batch size is: {}".format(config['batch_size']))
-
-init_cls_options = """ --batch-size {} --kmer-size {} --window-size {} --min-shared {} --min-qual {}\
-                     --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {} -M {} -P {} -g {} -c {}"""
-init_cls_options = init_cls_options.format(config["batch_size"], config["kmer_size"], config["window_size"], config["min_shared"], config["min_qual"], \
-                    config["mapped_threshold"], config["aligned_threshold"], config["min_fraction"], config["min_prob_no_hits"], config["batch_max_seq"], config["consensus_period"],
-config["consensus_minimum"], config["consensus_maximum"])
-
-shell("""
-        rm -fr clusters sorted
-        mkdir -p sorted; isONclust2 sort {} -v -o sorted {};
-        mkdir -p clusters;
-    """.format(init_cls_options, in_fastq))
-JOB_TREE = OrderedDict()
-LEVELS = None
 ROOT = None
+DYNAMIC_RULES="job_rules.snk"
+if ("SGE_O_HOST" not in os.environ):
+    nr_bases = count_fastq_bases(in_fastq)
+    if config['batch_size'] < 0:
+        config['batch_size'] = int(nr_bases/1000/config["cores"])
 
-build_job_tree("sorted/batches")
-generate_rules(LEVELS, "{}/job_rules.snk".format(SNAKEDIR))
-PRE_FINAL_CLS = "clusters/isONcluster_{}.cer".format(ROOT)
+    print("Batch size is: {}".format(config['batch_size']))
 
-include: "job_rules.snk"
+    init_cls_options = """ --batch-size {} --kmer-size {} --window-size {} --min-shared {} --min-qual {}\
+                         --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {} -M {} -P {} -g {} -c {}"""
+    init_cls_options = init_cls_options.format(config["batch_size"], config["kmer_size"], config["window_size"], config["min_shared"], config["min_qual"], \
+                        config["mapped_threshold"], config["aligned_threshold"], config["min_fraction"], config["min_prob_no_hits"], config["batch_max_seq"], config["consensus_period"],
+    config["consensus_minimum"], config["consensus_maximum"])
+
+    shell("""
+            rm -fr clusters sorted
+            mkdir -p sorted; isONclust2 sort {} -v -o sorted {};
+            mkdir -p clusters;
+        """.format(init_cls_options, in_fastq))
+    JOB_TREE = OrderedDict()
+    LEVELS = None
+
+    build_job_tree("sorted/batches")
+    generate_rules(LEVELS, "{}/job_rules.snk".format(SNAKEDIR))
+
+include: DYNAMIC_RULES
 
 rule all:
-    input: PRE_FINAL_CLS
+    input: rules.link_root.output
     output: directory("final_clusters")
-    params:
     shell:
-        """ isONclust2 dump -v -o {output} {input} """
-
+        """ isONclust2 dump -v -o final_clusters {input}; sync """
