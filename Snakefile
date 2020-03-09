@@ -32,6 +32,7 @@ class Node:
         self.Parent = Parent
         self.Level = Level
         self.Done = False
+        self.RightSide = False
     def __repr__(self):
         return "Node:{} Level: {} File: {} Done: {} Left: {} Right: {} Parent: {}".format(self.Id, self.Level, self.File, self.Done, self.Left.Id if self.Left is not None else None, self.Right.Id if self.Right is not None else None, self.Parent.Id if self.Parent is not None else None)
 
@@ -68,11 +69,13 @@ def build_job_tree(batch_dir):
             new_node = Node(max_id, new_batch, l, r, None, next_level)
             l.Parent = new_node
             r.Parent =  new_node
+            r.RightSide = True
             LEVELS[next_level].append(new_node)
             JOB_TREE[max_id] = new_node
         level = next_level
     global ROOT
     ROOT = JOB_TREE[len(JOB_TREE)-1].Id
+    JOB_TREE[ROOT].RightSide = True
     print("Merge clustering job tree nodes:",file=sys.stderr)
     for n in JOB_TREE.values():
         print("\t{}".format(n),file=sys.stderr)
@@ -84,7 +87,7 @@ rule cluster_job_%d:
     input:
         left = "sorted/batches/isONbatch_%d.cer",
     output: "clusters/isONcluster_%d.cer"
-    shell: "isONclust2 cluster -x %s -v -Q -l %s -o %s ; sync"
+    shell: "isONclust2 cluster -x %s -v -Q -l %s -o %s %s; sync"
 
     """
     template = """
@@ -93,7 +96,7 @@ rule cluster_job_%d:
         left = "clusters/isONcluster_%d.cer",
         right = "clusters/isONcluster_%d.cer",
     output: "clusters/isONcluster_%d.cer"
-    shell: "isONclust2 cluster -x %s -v -Q -l %s -r %s -o %s ; sync"
+    shell: "isONclust2 cluster -x %s -v -Q -l %s -r %s -o %s %s; sync"
 
     """
 
@@ -108,11 +111,12 @@ rule link_root:
     fh = open(snk, "w")
     for nr, l in levels.items():
         for n in l:
+            purge = "-z" if n.RightSide else ""
             if nr == 0 or n.Left is None or n.Right is None:
-                jr = init_template % (n.Id, n.Id, n.Id, config["cls_mode"], "{input.left}", "{output}")
+                jr = init_template % (n.Id, n.Id, n.Id, config["cls_mode"], "{input.left}", "{output}", purge)
                 fh.write(jr)
             else:
-                jr = template % (n.Id, n.Left.Id, n.Right.Id, n.Id, config["cls_mode"], "{input.left}", "{input.right}", "{output}")
+                jr = template % (n.Id, n.Left.Id, n.Right.Id, n.Id, config["cls_mode"], "{input.left}", "{input.right}", "{output}", purge)
                 fh.write(jr)
     global ROOT
     fh.write(link_template % ROOT)
