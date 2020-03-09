@@ -120,6 +120,7 @@ rule link_root:
                 fh.write(jr)
     global ROOT
     fh.write(link_template % ROOT)
+    fh.write("ROOT = %d" % ROOT)
     fh.flush()
     fh.close()
 
@@ -140,7 +141,8 @@ def count_fastq_bases(fname, size=128000000):
 
 ROOT = None
 DYNAMIC_RULES="job_rules.snk"
-if ("SGE_O_HOST" not in os.environ):
+if ("SGE_O_HOST" not in os.environ) and (not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))):
+    print("Counting records in input fastq:", in_fastq)
     nr_bases = count_fastq_bases(in_fastq)
     if config['batch_size'] < 0:
         config['batch_size'] = int(nr_bases/1000/config["cores"])
