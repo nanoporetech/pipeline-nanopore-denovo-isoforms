@@ -120,7 +120,7 @@ rule link_root:
                 fh.write(jr)
     global ROOT
     fh.write(link_template % ROOT)
-    fh.write("ROOT = %d" % ROOT)
+    fh.write("\nROOT = %d" % ROOT)
     fh.flush()
     fh.close()
 
@@ -141,7 +141,7 @@ def count_fastq_bases(fname, size=128000000):
 
 ROOT = None
 DYNAMIC_RULES="job_rules.snk"
-if ("SGE_O_HOST" not in os.environ) and (not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))):
+if (("SGE_O_HOST" not in os.environ) and (not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq")))) or (not os.path.isfile("job_rules.snk")):
     print("Counting records in input fastq:", in_fastq)
     nr_bases = count_fastq_bases(in_fastq)
     if config['batch_size'] < 0:
@@ -172,4 +172,4 @@ rule all:
     input: rules.link_root.output
     output: directory("final_clusters")
     shell:
-        """ isONclust2 dump -v -o final_clusters {input}; sync """
+        """ isONclust2 dump -v -i sorted/sorted_reads_idx.cer -o final_clusters {input}; sync """

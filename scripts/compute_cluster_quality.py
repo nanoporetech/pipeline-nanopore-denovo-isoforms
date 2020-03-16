@@ -19,7 +19,7 @@ def parse_inferred_clusters_tsv(tsv_file, args):
     infile.readline()
     clusters = {}
     for line in infile:
-        cluster_id, _, read_acc, _, _, _ = line.strip().split("\t")
+        cluster_id, _, read_acc = line.strip().split("\t")
         if args.simulated:
             read_acc = "_".join([item for item in read_acc.split("_")[:-1]])
         elif args.ont:
