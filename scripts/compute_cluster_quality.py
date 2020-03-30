@@ -395,7 +395,7 @@ def main(args):
     outfile.close()
 
     if args.ctsv is not None:
-        cfh = open(args.cstv, "w")
+        cfh = open(args.ctsv, "w")
         cfh.write("Read\tCluster\n")
         for r, c in classes.items():
             cfh.write("{}\t{}\n".format(r, c))
