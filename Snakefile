@@ -141,7 +141,7 @@ def count_fastq_bases(fname, size=128000000):
 
 ROOT = None
 DYNAMIC_RULES="job_rules.snk"
-if (("SGE_O_HOST" not in os.environ) and ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or (not os.path.isfile("job_rules.snk")))):
+if ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or (not os.path.isfile(os.path.join(SNAKEDIR, DYNAMIC_RULES)))):
     print("Counting records in input fastq:", in_fastq)
     nr_bases = count_fastq_bases(in_fastq)
     if config['batch_size'] < 0:

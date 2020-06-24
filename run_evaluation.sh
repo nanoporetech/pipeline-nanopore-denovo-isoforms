@@ -10,7 +10,7 @@ TSV="evaluation/pipeline-isONclust2_SIRV_E0/clustering_quality.tsv"
 PDF="evaluation/pipeline-isONclust2_SIRV_E0/clustering_quality.pdf"
 
 rm -fr evaluation/pipeline-isONclust2_SIRV_E0
-snakemake -j 20 all --configfile "evaluation/eval_config.yml"
+snakemake -p -j 20 all --configfile "evaluation/eval_config.yml"
 #snakemake --jobs 1000 --configfile $CONF --latency-wait 600 --drmaa-log-dir "sge_logs" --drmaa ' -P applications -V -cwd -l h_vmem=300G,mem_free=50G -pe mt 70' all
 
 minimap2 -ax splice -t 10 $REF $FASTQ | samtools view -q 20 -F 2304 -b - | samtools sort -@ 10 - -o $BAM
