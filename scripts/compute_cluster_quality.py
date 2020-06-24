@@ -394,6 +394,14 @@ def main(args):
                                                                                non_singleton_clusters, singleton_clusters, upper_75_cluster_size, median_cluster_size, e_cluster_size, n50_cluster_size))
     outfile.close()
 
+    if args.ctsv is not None:
+        cfh = open(args.ctsv, "w")
+        cfh.write("Read\tCluster\n")
+        for r, c in classes.items():
+            cfh.write("{}\t{}\n".format(r, c))
+        cfh.flush()
+        cfh.close()
+
     dfc = pd.DataFrame({'Statistic': ['V-measure', 'ARI', 'Completeness', 'Homogeneity'], 'Value': [V, ari, c, h]}).set_index('Statistic')
     dfn = pd.DataFrame({'Statistic': ['NonSingleton', 'Singletons'], 'Value': [non_singleton_clusters, singleton_clusters]}).set_index('Statistic')
     dfn2 = pd.DataFrame({'Statistic': ['NontrivialPerc'], 'Value': [Reads_nontrivially_clustered_percent]}).set_index('Statistic')
@@ -443,6 +451,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Align predicted transcripts to transcripts in ensembl reference data base.")
     parser.add_argument('--clusters', type=str, help='Inferred clusters (tsv file)')
     parser.add_argument('--classes', type=str, help='A sorted and indexed bam file.')
+    parser.add_argument('--ctsv', default=None, type=str, help='Write true classes in this TSV file.')
     parser.add_argument('--simulated', action="store_true", help='Simulated data, we can simply read correct classes from the ref field.')
     parser.add_argument('--ont', action="store_true", help='ONT data, parsing accessions differently.')
     parser.add_argument('--modified_ont', action="store_true", help='ONT data preprocessed accessions, parsing accessions differently.')
