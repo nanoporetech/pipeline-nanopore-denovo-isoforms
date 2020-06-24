@@ -139,11 +139,39 @@ def count_fastq_bases(fname, size=128000000):
     fh.close()
     return count
 
+def preprocess_reads(fq):
+    pc_opts = config["pychopper_opts"]
+    concat = config["concatenate"]
+    thr = config["cores"]
+
+    out_fq = "processed_reads/full_length_reads.fq"
+    if os.path.isdir("processed_reads"):
+        return out_fq
+
+    shell("mkdir -p processed_reads")
+    if concat:
+        print("Concatenating reads under directory: " + fq)
+        shell("find %s  -regextype posix-extended -regex '.*\.(fastq|fq)$' -exec cat {{}} \\; > processed_reads/input_reads.fq" % fq)
+    else:
+        shell("ln -s `realpath %s` processed_reads/input_reads.fq" % fq)
+
+    if config["run_pychopper"]:
+        print("Running pychopper of fastq file: processed_reads/input_reads.fq")
+        shell("(cd processed_reads; cdna_classifier.py -t %d %s input_reads.fq full_length_reads.fq)" % (thr, pc_opts))
+    else:
+        shell("ln -s `realpath processed_reads/input_reads.fq` processed_reads/full_length_reads.fq")
+
+    return out_fq
+
+
 ROOT = None
 DYNAMIC_RULES="job_rules.snk"
 if ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or (not os.path.isfile(os.path.join(SNAKEDIR, DYNAMIC_RULES)))):
-    print("Counting records in input fastq:", in_fastq)
-    nr_bases = count_fastq_bases(in_fastq)
+    print("Preprocessing read in fastq file:", in_fastq)
+    proc_fastq = preprocess_reads(in_fastq)
+    print("Counting records in input fastq:", proc_fastq)
+    nr_bases = count_fastq_bases(proc_fastq)
+    #print("Bases in input: {} megabases".format(int(nr_bases/10**6)))
     if config['batch_size'] < 0:
         config['batch_size'] = int(nr_bases/1000/config["cores"])
 
@@ -159,7 +187,7 @@ if ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or
             rm -fr clusters sorted
             mkdir -p sorted; isONclust2 sort {} -v -o sorted {};
             mkdir -p clusters;
-        """.format(init_cls_options, in_fastq))
+        """.format(init_cls_options, proc_fastq))
     JOB_TREE = OrderedDict()
     LEVELS = None
 
