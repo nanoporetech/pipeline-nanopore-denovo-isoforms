@@ -14,6 +14,15 @@ cores: 20
 # cDNA or direct RNA reads in fastq format
 reads_fastq: "evaluation/data/SIRV_PCS109_phmm_fl.fq"
 
+# The path above is a directory, find and concatenate fastq files:
+concatenate: false
+
+# Process cDNA reads using pychopper, turn off for direct RNA:
+run_pychopper: false
+
+# Options passed to pychopper:
+pychopper_opts: " -k PCS109 "
+
 # Batch size in kilobases (if -1 then it is calculated based on the number of cores and bases):
 batch_size: -1
 

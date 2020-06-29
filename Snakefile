@@ -171,17 +171,17 @@ if ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or
     proc_fastq = preprocess_reads(in_fastq)
     print("Counting records in input fastq:", proc_fastq)
     nr_bases = count_fastq_bases(proc_fastq)
-    #print("Bases in input: {} megabases".format(int(nr_bases/10**6)))
+    print("Bases in input: {} megabases".format(int(nr_bases/10**6)))
     if config['batch_size'] < 0:
         config['batch_size'] = int(nr_bases/1000/config["cores"])
 
     print("Batch size is: {}".format(config['batch_size']))
 
     init_cls_options = """ --batch-size {} --kmer-size {} --window-size {} --min-shared {} --min-qual {}\
-                         --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {} -M {} -P {} -g {} -c {}"""
+                         --mapped-threshold {} --aligned-threshold {} --min-fraction {} --min-prob-no-hits {} -M {} -P {} -g {} -c {} -F {} """
     init_cls_options = init_cls_options.format(config["batch_size"], config["kmer_size"], config["window_size"], config["min_shared"], config["min_qual"], \
                         config["mapped_threshold"], config["aligned_threshold"], config["min_fraction"], config["min_prob_no_hits"], config["batch_max_seq"], config["consensus_period"],
-    config["consensus_minimum"], config["consensus_maximum"])
+    config["consensus_minimum"], config["consensus_maximum"], config["min_left_cls"])
 
     shell("""
             rm -fr clusters sorted
