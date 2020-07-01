@@ -196,6 +196,8 @@ if ((not os.path.isfile(os.path.join(WORKDIR,"sorted","sorted_reads.fastq"))) or
 
 include: DYNAMIC_RULES
 
+
+
 rule all:
     input: rules.link_root.output
     output: directory("final_clusters")
