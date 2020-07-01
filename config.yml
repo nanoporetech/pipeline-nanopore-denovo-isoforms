@@ -39,7 +39,7 @@ kmer_size: 11
 window_size: 15
 
 # Minimum cluser size in the left batch:
-min_left_cls: 1
+min_left_cls: 2
 
 # Consensus period (-1 means no consensus):
 consensus_period: -1
