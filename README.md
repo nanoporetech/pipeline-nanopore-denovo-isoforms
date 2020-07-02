@@ -43,11 +43,34 @@ snakemake -j <num_cores> all
 Results
 =======
 
+The evaluation metrics (also described in the [isONclust preprint](https://www.biorxiv.org/content/10.1101/463463v1.full.pdf)) reported are:
+
+- [Homogeneity](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.homogeneity_score.html)
+- [Completenes](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html)
+- [V-measure](https://clusteringjl.readthedocs.io/en/latest/vmeasure.html)
+- [Adjusted Rand Index (ARI)](](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
+
 ## Performance on PCS109 SIRV data
+
+The performance on ~19k [SIRV E0 reads](/evaluation/data/SIRV_PCS109_phmm_fl.fq) generated using the PCS109 protocol can be assesed by running the evaluation script:
+
+```
+./run_evaluation.sh
+``` 
+
+The main results are:
 
 ![bench_SIRV](/evaluation/results/isonclust2_SIRV.png)
 
 ## Performance on PCS109 *Drosophila melanogaster* data
+
+The performance on a *D. melanogaster* datasets generated using the PCS109 protocol can be assesed by running the evaluation script:
+
+```
+./run_evaluation_dmel.sh
+``` 
+
+The main results are:
 
 ![bench_Dmel](/evaluation/results/isonclust2_dmel.png)
 
