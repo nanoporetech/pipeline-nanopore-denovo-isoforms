@@ -45,9 +45,11 @@ Results
 
 ## Performance on PCS109 SIRV data
 
+![bench_SIRV](/evaluation/results/isonclust2_SIRV.png)
 
 ## Performance on PCS109 *Drosophila melanogaster* data
 
+![bench_Dmel](/evaluation/results/isonclust2_dmel.png)
 
 ## Licence and Copyright
 
