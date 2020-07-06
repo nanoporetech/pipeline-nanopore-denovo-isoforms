@@ -97,6 +97,10 @@ The main results are:
 
 ![bench_Dmel](/evaluation/results/isonclust2_dmel.png)
 
+## Acknowledgements
+
+This software was built in collaboration with [Kristoffer Sahlin](https://www.scilifelab.se/researchers/kristoffer-sahlin/) and [Paul Medvedev](http://medvedevgroup.com/).
+
 ## Licence and Copyright
 
 (c) 2020 Oxford Nanopore Technologies Ltd.
