@@ -5,7 +5,9 @@ Pipeline for de novo clustering of long transcriptomic reads
 =============================================================
 
 A first natural step in the *de novo* analysis of long transcriptomic data in the absence of a reference genome is the clustering of the reads into groups corresponding to gene families.
-This pipeline performs that task using the [isONclust2](https://github.com/nanoporetech/isONclust2) tool, which is based on the approach pioneered by [isONclust](https://github.com/ksahlin/isONclust) using minimizers and occasional pairwise alignment. Since `isONclust2` is implemented in [C++](https://en.wikipedia.org/wiki/C%2B%2B) using efficient data structures and it can distribute computing across multiple cores and machines, it is able to cope with large transciptomic datasets generated on PromethION  P24 and P48 flowcells.
+This pipeline performs that task using the [isONclust2](https://github.com/nanoporetech/isONclust2) tool, which is based on the approach pioneered by [isONclust](https://github.com/ksahlin/isONclust) using minimizers and occasional pairwise alignment.
+
+Since `isONclust2` is implemented in [C++](https://en.wikipedia.org/wiki/C%2B%2B) using efficient data structures and it can distribute computing across multiple cores and machines, it is able to cope with large transciptomic datasets generated on PromethION  P24 and P48 flowcells.
 
 The pipeline optionally concatenates the fastq files under the MinKNOW/guppy output and performs the optional trimming and orientation of cDNA reads using [pychopper](https://github.com/nanoporetech/pychopper).  
 
