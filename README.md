@@ -66,12 +66,16 @@ snakemake --rerun-incomplete -j 1000 --latency-wait 600 --drmaa-log-dir sge_logs
 Results
 =======
 
-The evaluation metrics (also described in the [isONclust preprint](https://www.biorxiv.org/content/10.1101/463463v1.full.pdf)) reported are:
+The evaluation metrics (also described in the [isONclust paper](https://www.liebertpub.com/doi/abs/10.1089/cmb.2019.0299)) ([free version](https://www.biorxiv.org/content/10.1101/463463v1.full.pdf)) reported are:
 
 - [Homogeneity](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.homogeneity_score.html)
 - [Completenes](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html)
 - [V-measure](https://clusteringjl.readthedocs.io/en/latest/vmeasure.html)
 - [Adjusted Rand Index - ARI](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
+
+The clustering problem does not have a binary classification solution (i.e., that a single read is either correctly or incorrectly 'labeled' by the algorithm given som ground truth). Each read must instead be evaluated in relation to reads in the same and other clusters (e.g., which pairs or reads are 'correctly assigned to the same cluster?' and 'erroneously assigned to different clusters?'?). Because of this, common measures such as precision, recall, and F-score cannot be used. The Homogeneity, Completenes, and V-measure are analogous to the precision, recall, and F-score measures for binary classification problems but adapted for clustering problems.
+
+Intuitively, homogeneity (think precision) penalizes over-clustering, i.e. wrongly clustering together reads, while completeness (think sensitivity) penalizes under-clustering, i.e. mistakenly keeping reads in different clusters. The V-measure is then defined as the harmonic mean of homogeneity and completeness (think F-measure). We also included the commonly used adjusted Rand index (ARI). Intuitively, ARI mesures the percentage of read pairs correctly clustered, normalized so that a perfect clustering achieves an ARI of 1 and a random cluster assignment achieves an ARI of 0. Briefly, both of these clustering quality mertics are derived from computing *pairwise correct and incorrect groupings of reads*, instead of individually classifying a read as correct or incorrect (as in classification problems). 
 
 ## Performance on PCS109 SIRV data
 
