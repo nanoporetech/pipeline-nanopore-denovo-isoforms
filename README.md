@@ -4,14 +4,14 @@
 Pipeline for de novo clustering of long transcriptomic reads
 =============================================================
 
-A first natural step in the *de novo* analysis of long transcriptomic data in the absence of a reference genome is the clustering of the reads into groups corresponding to gene families.
+The first natural step in the *de novo* analysis of long transcriptomic data in the absence of a reference genome is the clustering of the reads into groups corresponding to gene families.
 This pipeline performs that task using the [isONclust2](https://github.com/nanoporetech/isONclust2) tool, which is based on the approach pioneered by [isONclust](https://github.com/ksahlin/isONclust) using minimizers and occasional pairwise alignment.
 
-Since `isONclust2` is implemented in [C++](https://en.wikipedia.org/wiki/C%2B%2B) using efficient data structures and it can distribute computing across multiple cores and machines, it is able to cope with large transcriptomic datasets generated using PromethION P24 and P48 flowcells.
+Since `isONclust2` is implemented in [C++](https://en.wikipedia.org/wiki/C%2B%2B) using efficient data structures, it can distribute computing across multiple cores and machines, thus it is able to cope with large transcriptomic datasets generated using PromethION P24 and P48 flow cells.
 
-The pipeline optionally concatenates the fastq files under the MinKNOW/guppy output and performs the optional trimming and orientation of cDNA reads using [pychopper](https://github.com/nanoporetech/pychopper).  
+The pipeline optionally concatenates FASTQ files in the MinKNOW/guppy output and performs the optional trimming and orientation of cDNA reads using [pychopper](https://github.com/nanoporetech/pychopper).  
 
-The main output of the pipeline is the assignment of read identifiers to gene clusters and the clustered reads grouped into one fastq file per gene cluster. This output is fit for downstream, gene level analysis.
+The main output of the pipeline is the assignment of read identifiers to gene clusters and the clustered reads grouped into one FASTQ file per gene cluster. This output is fit for downstream, gene level analysis.
 
 Getting Started
 ===============
@@ -58,7 +58,7 @@ Edit `config.yml` to set the input fastq and parameters, then on a local machine
 snakemake -j <num_cores> all
 ```
 
-For analysing larger datsets (e.g. a PromethION flowcell) it is advisable to run the pipeline on a SGE cluster through DRMAA:
+For analysing larger datsets (e.g. a PromethION flow cell) it is advisable to run the pipeline on a SGE cluster through DRMAA:
 
 ```bash
 snakemake --rerun-incomplete -j 1000 --latency-wait 600 --drmaa-log-dir sge_logs --drmaa ' -P project_name -V -cwd -l h_vmem=200G,mem_free=155G -pe mt 5' all
@@ -74,9 +74,9 @@ The evaluation metrics (also described in the [isONclust paper](https://www.lieb
 - [V-measure](https://clusteringjl.readthedocs.io/en/latest/vmeasure.html)
 - [Adjusted Rand Index - ARI](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 
-The clustering problem does not have a binary classification solution (i.e., that a single read is either correctly or incorrectly "labeled" by the algorithm given som ground truth). Each read must instead be evaluated in relation to reads in the same and other clusters (e.g., which pairs or reads are "correctly assigned to the same cluster?" and "erroneously assigned to different clusters?"). Because of this, common measures such as [precision, recall, and F-score](https://en.wikipedia.org/wiki/Precision_and_recall) cannot be used. The Homogeneity, Completeness, and V-measure are analogous to the precision, recall, and F-score measures for binary classification problems but adapted for clustering problems.
+The clustering has a binary classification issue (i.e. a single read is either correctly or incorrectly "labelled" by the algorithm given a ground truth). Each read must instead be evaluated in relation to the reads in the same and other clusters (e.g. which pairs or reads are "correctly assigned to the same cluster?" and "erroneously assigned to different clusters?"). From this, common measures such as [precision, recall, and F-score](https://en.wikipedia.org/wiki/Precision_and_recall) cannot be used. The Homogeneity, completeness, and V-measure are analogous to the precision, recall, and F-score measures for binary classification issues, but are adapted for clustering issues. 
 
-Intuitively, homogeneity (think precision) penalizes over-clustering, i.e. wrongly clustering together reads, while completeness (think sensitivity) penalizes under-clustering, i.e. mistakenly keeping reads in different clusters. The V-measure is then defined as the harmonic mean of homogeneity and completeness (think F-measure). We also included the commonly used adjusted Rand index (ARI). Intuitively, ARI measures the percentage of read pairs correctly clustered, normalized so that a perfect clustering achieves an ARI of 1 and a random cluster assignment achieves an ARI of 0. Briefly, both of these clustering quality metrics are derived from computing *pairwise correct and incorrect groupings of reads*, instead of individually classifying a read as correct or incorrect (as in classification problems). 
+Intuitively, homogeneity (i.e. precision) penalizes over-clustering, i.e. wrongly clustering together reads, while completeness (i.e. sensitivity) penalizes under-clustering, i.e. mistakenly keeping reads in different clusters. The V-measure is then defined as the mean of homogeneity and completeness (i.e. F-measure). We also include the commonly used Adjusted Rand Index (ARI). Intuitively, ARI measures the percentage of read pairs correctly clustered, normalized so that a perfect clustering achieves an ARI of 1 and a random cluster assignment achieves an ARI of 0. Briefly, both of these clustering quality metrics are derived from computing *pairwise correct and incorrect groupings of reads*, instead of individually classifying a read as correct or incorrect (as in classification issues). 
 
 ## Performance on PCS109 SIRV data
 
@@ -92,7 +92,7 @@ The main results are:
 
 ## Performance on PCS109 *Drosophila melanogaster* data
 
-The performance on a *D. melanogaster* datasets generated using the PCS109 protocol can be assesed by running the evaluation script:
+The performance on a *D. melanogaster* datasets generated using the SQK-PCS109 protocol can be assesed by running the evaluation script:
 
 ```
 ./run_evaluation_dmel.sh
