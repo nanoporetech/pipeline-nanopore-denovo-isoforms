@@ -72,7 +72,7 @@ The evaluation metrics (also described in the [isONclust paper](https://www.lieb
 - [Homogeneity](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.homogeneity_score.html)
 - [Completeness](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html)
 - [V-measure](https://clusteringjl.readthedocs.io/en/latest/vmeasure.html)
-- [Adjusted Rand Index - ARI](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
+- [Adjusted Rand Index - ARI](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 
 The clustering has a binary classification issue (i.e. a single read is either correctly or incorrectly "labelled" by the algorithm given a ground truth). Each read must instead be evaluated in relation to the reads in the same and other clusters (e.g. which pairs or reads are "correctly assigned to the same cluster?" and "erroneously assigned to different clusters?"). From this, common measures such as [precision, recall, and F-score](https://en.wikipedia.org/wiki/Precision_and_recall) cannot be used. The Homogeneity, completeness, and V-measure are analogous to the precision, recall, and F-score measures for binary classification issues, but are adapted for clustering issues. 
 
