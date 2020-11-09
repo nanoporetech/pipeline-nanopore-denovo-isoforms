@@ -44,10 +44,16 @@ Clone the pipeline and the pipeline toolset by issuing:
 git clone --recursive https://github.com/nanoporetech/pipeline-nanopore-denovo-isoforms.git
 ```
 
-Install the dependencies using conda into the base environment:
+Install the dependencies using conda into a new environment:
 
 ```bash
-conda env update --file env.yml
+conda env create -f env.yml
+```
+
+Activate the conda environment:
+
+```bash
+conda activate denovo-isoforms
 ```
 
 ## Usage
