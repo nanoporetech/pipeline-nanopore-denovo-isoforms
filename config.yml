@@ -44,6 +44,12 @@ min_left_cls: 2
 # Consensus period (-1 means no consensus):
 consensus_period: -1
 
+# Minimum consensus sample size:
+consensus_minimum: 50
+
+# Maximum consensus sample size:
+consensus_maximum: -150
+
 # Minimum number of minimizers shared between read and cluster:
 min_shared: 5
 
