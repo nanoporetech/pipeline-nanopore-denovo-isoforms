@@ -16,7 +16,6 @@ WORKDIR = path.abspath(path.join(config["workdir_top"], config["pipeline"]))
 workdir: WORKDIR
 SNAKEDIR = path.dirname(workflow.snakefile)
 
-include: "snakelib/utils.snake"
 
 in_fastq = config["reads_fastq"]
 if not path.isabs(in_fastq):
@@ -198,8 +197,103 @@ include: DYNAMIC_RULES
 
 
 
-rule all:
+rule dump_clusters:
     input: rules.link_root.output
     output: directory("final_clusters")
     shell:
         """ isONclust2 dump -v -i sorted/sorted_reads_idx.cer -o final_clusters {input}; sync """
+
+rule build_backbones:
+	input:
+		cls = rules.dump_clusters.output,
+	output: 
+		back = directory("backbones"),
+		cds = "coding_sequences.fa",
+		sam = "backbone_samples.fq",
+	shell: """
+		mkdir backbones
+		rm -f {output.cds} {output.sam}
+		for cluster in {input.cls}/cluster_fastq/*.fq;
+		do
+			clfq=`basename $cluster`
+			cln=${{clfq%.*}}
+			echo Building backbone for cluster: $cln
+			echo "\tSampling input reads for backbone construction."
+			sample={output.back}/${{cln}}_sample.fq
+			seqkit head --quiet -n 100 ${{cluster}}    > $sample
+			seqkit sample --quiet -n 500 -2 ${{cluster}}    >> $sample
+			echo "\tConstructing spoa consensus."
+			spoa_cons={output.back}/${{cln}}_spoa.fa
+			spoa -m 5 -n -4 -g -8 -e -6 -q -10 -c -15 -l 1 -r 0 $sample > $spoa_cons
+			echo "\tPolishing the consenus."
+			samgz={output.back}/${{cln}}_aln.sam.gz	
+			minimap2 -ax splice --splice-flank=no $spoa_cons $sample | gzip - > $samgz
+			racon_cons={output.back}/${{cln}}_racon.fa
+			racon -t 2 --no-trimming -u -w 2000 $sample $samgz $spoa_cons > $racon_cons
+			#cat $racon_cons | sed /^\>.*$/\>cluster_{{cln}}/ >> {output.cds}
+			cat $racon_cons | seqkit replace -p ".*" -r cluster_${{cln}} >> {output.cds}
+			cat $sample >> backbone_samples.fq
+			rm -f $samgz
+		done
+		
+	"""
+
+rule racon_two:
+	input:
+		rc = rules.build_backbones.output.cds,
+		reads = rules.build_backbones.output.sam,
+	output:
+		pcons = "polished_coding_sequences.fa"
+	shell: """
+		samgz=reads_to_cds.sam.gz	
+		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
+		racon -t 2  -u --no-trimming -w 2000 {input.reads} $samgz {input.rc} > {output.pcons}
+		rm -f $samgz
+	"""
+
+rule racon_three:
+	input:
+		rc = rules.racon_two.output.pcons,
+		reads = rules.build_backbones.output.sam,
+	output:
+		pcons = "final_polished_coding_sequences.fa"
+	shell: """
+		samgz=reads_to_cds.sam.gz	
+		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
+		racon -t 2  -u -w 500 {input.reads} $samgz {input.rc} > {output.pcons}
+		rm $samgz
+	"""
+
+rule cds_aln:
+	input:
+		rc = rules.racon_three.output.pcons,
+		reads = "sorted/sorted_reads.fastq",
+	output:
+		bam = "cds_aln.bam"
+	shell: """
+		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | samtools view -b - |\
+		samtools sort -o {output.bam} -
+		samtools index {output.bam} 
+	"""
+
+rule call_transcripts:
+	input:
+		rc = rules.racon_three.output.pcons,
+		bam = rules.cds_aln.output.bam,
+	output:
+		gff = "stringtie_transcripts.gff",
+		fas = "de_novo_transcripts.fas",
+	shell: """
+		 stringtie -L --rf -o {output.gff} {input.bam}
+		 gffread -g {input.rc} -w {output.fas} {output.gff}
+	"""
+
+
+rule all:
+	input:
+		final_clusters=rules.dump_clusters.output,
+		backbones=rules.build_backbones.output,
+		polished_cds=rules.racon_two.output.pcons,
+		polished_cds_final=rules.racon_three.output.pcons,
+		bam = rules.cds_aln.output.bam,
+		trs = rules.call_transcripts.output.fas,
