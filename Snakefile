@@ -208,31 +208,36 @@ rule build_backbones:
 		cls = rules.dump_clusters.output,
 	output: 
 		back = directory("backbones"),
-		cds = "coding_sequences.fa",
-		sam = "backbone_samples.fq",
+		cds = "backbones/coding_sequences.fa",
+		sam = "backbones/backbone_samples.fq",
+	threads: config["threads"]
 	shell: """
-		mkdir backbones
+		rm -fr backbones
+		mkdir -p backbones
 		rm -f {output.cds} {output.sam}
 		for cluster in {input.cls}/cluster_fastq/*.fq;
 		do
 			clfq=`basename $cluster`
 			cln=${{clfq%.*}}
+
 			echo Building backbone for cluster: $cln
 			echo "\tSampling input reads for backbone construction."
 			sample={output.back}/${{cln}}_sample.fq
 			seqkit head --quiet -n 100 ${{cluster}}    > $sample
 			seqkit sample --quiet -n 500 -2 ${{cluster}}    >> $sample
+
 			echo "\tConstructing spoa consensus."
 			spoa_cons={output.back}/${{cln}}_spoa.fa
 			spoa -m 5 -n -4 -g -8 -e -6 -q -10 -c -15 -l 1 -r 0 $sample > $spoa_cons
-			echo "\tPolishing the consenus."
+
+			echo "\tPolishing the consenus using racon."
 			samgz={output.back}/${{cln}}_aln.sam.gz	
-			minimap2 -ax splice --splice-flank=no $spoa_cons $sample | gzip - > $samgz
+			minimap2 -t {threads} -ax splice --splice-flank=no $spoa_cons $sample | gzip - > $samgz
 			racon_cons={output.back}/${{cln}}_racon.fa
-			racon -t 2 --no-trimming -u -w 2000 $sample $samgz $spoa_cons > $racon_cons
+			racon -t {threads} --no-trimming -u -w 2000 $sample $samgz $spoa_cons > $racon_cons
 			#cat $racon_cons | sed /^\>.*$/\>cluster_{{cln}}/ >> {output.cds}
 			cat $racon_cons | seqkit replace -p ".*" -r cluster_${{cln}} >> {output.cds}
-			cat $sample >> backbone_samples.fq
+			cat $sample >> {output.sam}
 			rm -f $samgz
 		done
 		
@@ -244,10 +249,11 @@ rule racon_two:
 		reads = rules.build_backbones.output.sam,
 	output:
 		pcons = "polished_coding_sequences.fa"
+	threads: config["threads"]
 	shell: """
 		samgz=reads_to_cds.sam.gz	
-		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
-		racon -t 2  -u --no-trimming -w 2000 {input.reads} $samgz {input.rc} > {output.pcons}
+		minimap2 -t {threads} -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
+		racon -t {threads}  -u --no-trimming {input.reads} $samgz {input.rc} > {output.pcons}
 		rm -f $samgz
 	"""
 
@@ -257,10 +263,11 @@ rule racon_three:
 		reads = rules.build_backbones.output.sam,
 	output:
 		pcons = "final_polished_coding_sequences.fa"
+	threads: config["threads"]
 	shell: """
 		samgz=reads_to_cds.sam.gz	
-		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
-		racon -t 2  -u -w 500 {input.reads} $samgz {input.rc} > {output.pcons}
+		minimap2 -t {threads} -ax splice --splice-flank=no {input.rc} {input.reads} | gzip - > $samgz
+		racon -t {threads}  -u {input.reads} $samgz {input.rc} > {output.pcons}
 		rm $samgz
 	"""
 
@@ -270,8 +277,9 @@ rule cds_aln:
 		reads = "sorted/sorted_reads.fastq",
 	output:
 		bam = "cds_aln.bam"
+	threads: config["threads"]
 	shell: """
-		minimap2 -ax splice --splice-flank=no {input.rc} {input.reads} | samtools view -b - |\
+		minimap2 -t {threads} -ax splice --splice-flank=no {input.rc} {input.reads} | samtools view -b - |\
 		samtools sort -o {output.bam} -
 		samtools index {output.bam} 
 	"""

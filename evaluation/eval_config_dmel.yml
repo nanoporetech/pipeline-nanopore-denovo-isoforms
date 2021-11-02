@@ -67,3 +67,6 @@ min_fraction: 0.8
 
 # Minimum probability for i consecutive minimizers to be different between read and representative:
 min_prob_no_hits: 0.1 
+
+# Threads used in racon polishing:
+threads: 2
