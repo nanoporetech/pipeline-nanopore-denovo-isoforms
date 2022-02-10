@@ -83,10 +83,15 @@ def build_job_tree(batch_dir):
 
 def generate_rules(levels, snk):
     init_template = """
+rule maketemp_%d:
+    input: "sorted/batches/isONbatch_%d.cer",
+    output: temp("clusters/U_isONbatch_%d.cer")
+    shell: "mv {input} {output}; sync"
+
 rule cluster_job_%d:
     input:
-        left = "sorted/batches/isONbatch_%d.cer",
-    output: "clusters/isONcluster_%d.cer"
+        left = "clusters/U_isONbatch_%d.cer",
+    output: temp("clusters/isONcluster_%d.cer")
     shell: "isONclust2 cluster -x %s -v -Q -l %s -o %s %s; sync"
 
     """
@@ -95,7 +100,7 @@ rule cluster_job_%d:
     input:
         left = "clusters/isONcluster_%d.cer",
         right = "clusters/isONcluster_%d.cer",
-    output: "clusters/isONcluster_%d.cer"
+    output: temp("clusters/isONcluster_%d.cer")
     shell: "isONclust2 cluster -x %s -v -Q -l %s -r %s -o %s %s; sync"
 
     """
@@ -104,7 +109,7 @@ rule cluster_job_%d:
 rule link_root:
     input: "clusters/isONcluster_%d.cer",
     output: "clusters/isONcluster_ROOT.cer"
-    shell: "ln -s `realpath {input}` {output}"
+    shell: "cp `realpath {input}` {output}"
 
     """
 
@@ -113,7 +118,7 @@ rule link_root:
         for n in l:
             purge = "-z" if n.RightSide else ""
             if nr == 0 or n.Left is None or n.Right is None:
-                jr = init_template % (n.Id, n.Id, n.Id, config["cls_mode"], "{input.left}", "{output}", purge)
+                jr = init_template % (n.Id, n.Id, n.Id, n.Id, n.Id, n.Id, config["cls_mode"], "{input.left}", "{output}", purge)
                 fh.write(jr)
             else:
                 jr = template % (n.Id, n.Left.Id, n.Right.Id, n.Id, config["cls_mode"], "{input.left}", "{input.right}", "{output}", purge)
